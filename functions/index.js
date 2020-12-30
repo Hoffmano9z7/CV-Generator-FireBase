@@ -1,10 +1,11 @@
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
+const pdf = require('html-pdf');
+const cors = require('cors')({origin: true});
 
 admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
 
-const pdf = require('html-pdf');
 
 const headerHtml = (data) => {
 
@@ -26,13 +27,13 @@ const headerHtml = (data) => {
     return result;  
 }
 
-const worksHtml = (data) => {
-    const { jobs } = data;
+const worksHtml = ({ jobs }) => {
     let result = `
     <div class="job">
         <p class="subject">Employment History</p>
         <hr>
     `;
+    jobs.reverse();
     jobs.forEach( job => {
         result += `
             <p><b>${job.firm}</b></p>
@@ -80,13 +81,13 @@ const skillsHtml = (data) => {
     return result;
 }
 
-const eduHtml = (data) => {
-    const { edu } = data;
+const eduHtml = ({ edu }) => {
     let result = `
         <div class="edu">
-            <p class="subject">Education</p>
+            <p class="subject">Education & Certificate</p>
             <hr>
     `;
+    edu.reverse();
     edu.forEach( info => {
         result += `
             <p><b>${info.school}</b></p>
@@ -175,6 +176,9 @@ const getPdfHtml = (data) => {
                 ${headerHtml(data)}
                 ${worksHtml(data)}
                 ${skillsHtml(data)}
+                <br>
+                <br>
+                <br>
                 ${eduHtml(data)}
                 ${langHtml(data)}  
             </body>
@@ -200,7 +204,6 @@ exports.downloadCV = functions.https.onRequest( (req, res) => {
                 if(doc.exists) {
                     let html = getPdfHtml(doc.data());
                     if('pdf'===docType) {
-                        //return res.status(200).json({html: html});
                         return pdf.create(html, options).toStream( (err, stream) => {
                             if(err) res.status(404).json({error: 'error!'});
                             res.setHeader('Content-type', 'application/pdf');
