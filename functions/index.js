@@ -51,7 +51,7 @@ const skillsHtml = (data) => {
   const { skill } = data;
   let result = `
         <div class="skill">
-            <p class="subject">Programming Skills</p>
+            <p class="subject">Techniques</p>
             <hr>   
             <table>     
     `;
@@ -173,10 +173,9 @@ const getPdfHtml = (data) => {
             <body>
                 ${headerHtml(data)}
                 ${worksHtml(data)}
+                <br>
+                <br>
                 ${skillsHtml(data)}
-                <br>
-                <br>
-                <br>
                 ${eduHtml(data)}
                 ${langHtml(data)}  
             </body>
